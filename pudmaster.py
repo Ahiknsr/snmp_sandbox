@@ -3,22 +3,26 @@ from pysnmp.entity.rfc3413.oneliner import cmdgen
 from pysnmp.smi import builder, view
 import argparse
 import tabulate
+import os
 
 #debug.setLogger(debug.Debug('all'))
 cmdGen = cmdgen.CommandGenerator()
 
+mibdir = "%s/mib" % os.path.dirname(os.path.realpath(__file__))
+
 # create MIB builder
-mibBuilder = builder.MibBuilder().loadModules('SNMPv2-MIB', 'IF-MIB', 'Sentry3')
+#mibBuilder = builder.MibBuilder()
+
+mibBuilder = cmdGen.snmpEngine.msgAndPduDsp.mibInstrumController.mibBuilder
+
+# load mibs
+mibSources = mibBuilder.getMibSources() + (builder.DirMibSource(mibdir),)
+mibBuilder.setMibSources(*mibSources)
+
+mibBuilder.loadModules('SNMPv2-MIB', 'IF-MIB', 'Sentry3')
 
 # the view controller is handy for viewing objects
 mibViewController = view.MibViewController(mibBuilder)
-
-# this sets a path where we can store our mib-file Sentry3.pyc
-mibSources = mibBuilder.getMibSources() + (
-                builder.DirMibSource('some/convenient/place'),
-             )
-
-mibBuilder.setMibSources(*mibSources)
 
 # a list of pdu ips
 ip_addresses = ('10.0.0.9', '10.0.0.13')
