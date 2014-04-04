@@ -1,0 +1,5 @@
+pysnmp
+pysnmp-apps
+pysnmp-mibs
+Sphinx
+tabulate
