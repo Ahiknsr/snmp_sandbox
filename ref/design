@@ -1,0 +1,92 @@
+pdu stuff:
+turn on and off outlets (by name)
+name outlets
+outlet groups
+
+
+commands:
+    database
+        scan all pdus, populate db
+
+    show pdus (table of pdus and their named outlets, env and load data)
+    show pdu (all pdu info by pdu name Sentry3::systemLocation."0")
+    set outlet label
+    turn on/off outlet
+    find outlet by name (show pdu and outlet info matching search term)
+
+    outlet groups
+        detect by name (sane naming convention?)
+        power on/off by group
+
+
+
+
+db:
+    pdu  (system)
+        Sentry3::systemVersion."0" = Sentry Switched CDU Version 6.0f
+        Sentry3::systemNICSerialNumber."0" = 8109568
+        Sentry3::systemLocation."0" = pdu-b210-dell03
+        Sentry3::systemTowerCount."0" = 2
+        Sentry3::systemEnvMonCount."0" = 1
+        Sentry3::systemTotalPower."0" = 0
+        Sentry3::systemPowerFactor."0" = 100
+
+    tower .<t>
+        pdu_id
+        Sentry3::towerID."1" = A  (.1,.2, etc)
+        Sentry3::towerName."1" = TowerA
+        Sentry3::towerStatus."1" = 'normal'
+        Sentry3::towerInfeedCount."1" = 1
+        Sentry3::towerProductSN."1" = 
+        Sentry3::towerModelNumber."1" = 
+        Sentry3::towerCapabilities."1" = 
+
+    infeed .<t> .<i>
+        pdu_id
+        Sentry3::infeedID."1"."1" = AA (.1.1, .2.1, etc)
+        Sentry3::infeedName."1"."1" = B210-Dell03-1
+        Sentry3::infeedCapabilities."1"."1" = onSense, loadSense
+        Sentry3::infeedStatus."1"."1" = 'on'
+        Sentry3::infeedLoadStatus."1"."1" = 'normal'
+        Sentry3::infeedLoadValue."1"."1" = 0
+        Sentry3::infeedLoadHighThresh."1"."1" = 255
+        Sentry3::infeedOutletCount."1"."1" = 8
+        Sentry3::infeedCapacity."1"."1" = 255
+        Sentry3::infeedVoltage."1"."1" = -1
+        Sentry3::infeedPower."1"."1" = -1
+
+    outlet .<t> .<i> .<o>
+        pdu_id
+        Sentry3::outletID."1"."1"."1" = A1
+        Sentry3::outletName."1"."1"."1" = google7
+        Sentry3::outletCapabilities."1"."1"."1" = powerControl
+        Sentry3::outletStatus."1"."1"."1" = 'on'
+        Sentry3::outletLoadStatus."1"."1"."1" = 'normal'
+        Sentry3::outletLoadValue."1"."1"."1" = -1
+        Sentry3::outletLoadLowThresh."1"."1"."1" = 0
+        Sentry3::outletLoadHighThresh."1"."1"."1" = 255
+        Sentry3::outletControlState."1"."1"."1" = 'wakeOn' 
+        Sentry3::outletControlAction."1"."1"."1" = 'none'
+
+    env_mon .<em>
+        pdu_id
+        Sentry3::envMonID."1" = A
+        Sentry3::envMonName."1" = Environmental_Monitor_A
+        Sentry3::envMonStatus."1" = 'normal'
+        Sentry3::envMonTempHumidSensorCount."1" = 2
+        Sentry3::envMonContactClosureCount."1" = 0
+
+    temp_hum .<em> .<th>
+        Sentry3::tempHumidSensorID."1"."1" = A1
+        Sentry3::tempHumidSensorName."1"."1" = Temp_Humid_Sensor_A1
+        Sentry3::tempHumidSensorStatus."1"."1" = 'notFound'
+        Sentry3::tempHumidSensorTempStatus."1"."1" = 'notFound'
+        Sentry3::tempHumidSensorTempValue."1"."1" = -1
+        Sentry3::tempHumidSensorTempLowThresh."1"."1" = 0
+        Sentry3::tempHumidSensorTempHighThresh."1"."1" = 123
+        Sentry3::tempHumidSensorHumidStatus."1"."1" = 'notFound'
+        Sentry3::tempHumidSensorHumidValue."1"."1" = -1
+        Sentry3::tempHumidSensorHumidLowThresh."1"."1" = 0
+        Sentry3::tempHumidSensorHumidHighThresh."1"."1" = 100
+        Sentry3::tempHumidSensorTempScale."1"."1" = 'celsius'
+
