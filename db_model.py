@@ -5,7 +5,7 @@ create table pdus(
     --stuff here
 );
 """
-
+#TODO refactor this out into its own class
 class pdu_unit_status():
     def __init__(self):
         raise NotImplementedError
