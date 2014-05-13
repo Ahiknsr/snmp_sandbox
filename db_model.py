@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import update
 from sqlalchemy.orm import sessionmaker
 
-class pdu_unit_status(sql_base):
+class pdu_unit_status(sql_base()):
     """This class represents a table in the database holding pdu data"""
     __tablename__ = 'pdus'
     pdu_name = Column(String, primary_key=True)
@@ -45,6 +45,9 @@ class db_model():
             update(self.sql_base).where(pdu_name == pdu).values(**fields)
         #self.db_session.add(new_pdu)
         self.db_session.commit()
+
+    def __del__(self):
+        self.db.close()
 
 
     
