@@ -12,13 +12,13 @@ class Controller:
         self.cli.draw_ui(pdus)
         #When the program exits call the cleanup to clean up curses and the db
         atexit.register(self.cleanup)
-        #db_model.initdb(in_memory=True)
-        #db_model.get_stats(pdumaster.get_stats())
+        self.db = db_model.db_model(inMemory=True)
+        self.db.add_many_pdus(pdumaster.get_stats())
+
 
     def cleanup(self):
         """When the program exits clean up changes curses made to the terminal and the db session"""
         self.cli.cleanup()
-        #db_model.cleanup()
 
 if __name__ == '__main__':
     controller = Controller()
