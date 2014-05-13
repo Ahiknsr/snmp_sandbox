@@ -1,24 +1,25 @@
 import curses
 
 class curses_cli:
-    def setup(stdscr):
+    def setup(self):
+        self.stdscr = curses.initscr()
         curses.noecho()
         curses.cbreak()
-        stdscr.keypad(1)
+        self.stdscr.keypad(1)
 
-    def draw_ui(stdscr,pdus):
-        stdscr.border(0)
-        stdscr.addstr(2, 5, "OSL PDU management!")
+    def draw_ui(self, pdus):
+        self.stdscr.border(0)
+        self.stdscr.addstr(2, 5, "OSL PDU management!")
         current_col = 5
-        stdscr.refresh()
+        self.stdscr.refresh()
         for pdu in pdus:
-            stdscr.addstr( current_col, 5, pdu)
+            self.stdscr.addstr( current_col, 5, pdu)
             current_col += 3 + len(pdu)
-        stdscr.getch()
+        self.stdscr.getch()
 
-    def cleanup(stdscr):
+    def cleanup(self):
         curses.nocbreak()
-        stdscr.keypad(0)
+        self.stdscr.keypad(0)
         curses.echo()
         curses.endwin()
 
