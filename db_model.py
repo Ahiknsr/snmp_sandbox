@@ -14,8 +14,7 @@ class pdu_unit_status(sql_base()):
 
     def __repr__(self):
         """For pretty printing"""
-        return "pdu_name %s, sym_name %s, suffix %s, val %i" % 
-            (self.name, self.fullname, self.password)
+        return "pdu_name %s, sym_name %s, suffix %s, val %i" % (self.name, self.fullname, self.password)
 
 
 class db_model():
