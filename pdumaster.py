@@ -3,14 +3,16 @@ from pysnmp import debug
 #from pysnmp.smi import builder, view
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 
+
+pdu_data = namedtuple("pdu data", ("modName", "symName", "suffix"))
+
 #thanks checkaa for the name
 class pdu_device_whisperer:
-    def __init__(self):
-        #list of pdus TODO: make these be read from a config file
-        self.pdus = ('pdu-b210-dell03.osuosl.oob', 'pdu-b210-dell13.osuosl.oob')
-        pass
+    def __init__(self, pdus):
+        self.pdus = pdus
 
     def scan_pdus(self):
+        """Scans all the pdus and returns a list of named tuples"""
         for pdu in self.pdus:
             errorIndication, errorStatus, errorIndex, varBindTable = cmdGen.nextCmd(
                 cmdgen.CommunityData('OSL_private'),
@@ -20,8 +22,8 @@ class pdu_device_whisperer:
                 ignoreNonIncreasingOid=True
             )
 
+        pdu_data_list = []
         # Check for errors and print out results
-
         if errorIndication:
             #TODO: handle errors gracefully
             print(errorIndication)
@@ -38,6 +40,8 @@ class pdu_device_whisperer:
                         modName, symName, suffix = mibViewController.getNodeLocation((name))
                         print "%s - %s - %s - %s" % (pdu, symName, suffix, val)
                         print "-------"
+                        pdu_data_list.append(pdu_data(modName, symName, suffix))
                         #print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
+        return pdu_data_list
 
 
