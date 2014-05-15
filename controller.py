@@ -1,21 +1,26 @@
 import json
 import atexit
+import logging
 
 import curses_cli
 import db_model
 import pdumaster
+
+DEBUT = True
 
 class Controller:
     def setup(self):
         """Setup ui and database, get pdu stats."""
         #When the program exits call the cleanup to clean up curses and the db
         atexit.register(self.cleanup)
+        if DEBUG:
+            logging.basicConfig(filename="debug.log", level=logging.DEBUG)
 
         self.cli = curses_cli.curses_cli()
         self.cli.setup()
 
         pdus = read_config()
-        print pdus
+        logging.debug("PDUs in config: {0}", pdus)
 
         whisperer = pdu_device_whisperer(pdus)
 
@@ -36,6 +41,7 @@ class Controller:
     def cleanup(self):
         """When the program exits clean up changes curses made to the terminal and the db session"""
         self.cli.cleanup()
+        print "Sorry, there was an error we couldn't recover from."
 
 if __name__ == '__main__':
     controller = Controller()
