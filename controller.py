@@ -19,7 +19,7 @@ class Controller:
         self.cli = curses_cli.curses_cli()
         self.cli.setup()
 
-        pdus = read_config()
+        pdus = self.read_config()
         logging.debug("PDUs in config: {0}", pdus)
 
         whisperer = pdu_device_whisperer(pdus)
