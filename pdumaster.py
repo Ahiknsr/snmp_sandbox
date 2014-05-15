@@ -4,7 +4,7 @@ from pysnmp import debug
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 
 
-pdu_data = namedtuple("pdu data", ("modName", "symName", "suffix"))
+pdu_data = namedtuple("pdu_data", ("modName", "symName", "suffix"))
 
 #thanks checkaa for the name
 class pdu_device_whisperer:
