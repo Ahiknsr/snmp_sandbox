@@ -18,27 +18,20 @@ class Controller:
             #When the program exits call the cleanup to clean up curses and the db
             atexit.register(self.cleanup)
 
-        self.cli = curses_cli.curses_cli()
-        self.cli.setup()
 
         pdus = self.read_config()
         logging.debug("PDUs in config: {0}", pdus)
 
         whisperer = pdu_device_whisperer(pdus)
+        create_cli()
 
-        self.cli.draw_ui(pdus)
         self.db = db_model.db_model(in_memory=True)
         self.db.add_many_pdus(pdumaster.get_stats())
 
-    def read_config(config_name=None):
-        """Reads a config file (default is ./osuosl_pdus.conf), parses it as json and returns the python dictionary it represents"""
-        if config_name != None:
-            controller = './osuosl_pdus.json'
-        config = open(controller, 'r')
-        config_pdus = json.load(config)
-        config.close()
-        return  config_pdus
-
+    def create_cli():
+        self.cli = curses_cli.curses_cli()
+        self.cli.setup()
+        self.cli.draw_ui(pdus)
 
     def cleanup(self):
         """When the program exits clean up changes curses made to the terminal and the db session"""
