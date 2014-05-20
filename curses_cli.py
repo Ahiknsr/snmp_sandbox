@@ -1,3 +1,5 @@
+import logging
+
 import curses
 
 class curses_cli:
@@ -13,6 +15,8 @@ class curses_cli:
         current_col = 5
         self.stdscr.refresh()
         for pdu in pdus:
+			logging.debug("pdu to add " + pdu + " at col " + 
+				str(current_col) + " and line 5")
             self.stdscr.addstr( current_col, 5, pdu)
             current_col += 3 + len(pdu)
         self.stdscr.getch()
