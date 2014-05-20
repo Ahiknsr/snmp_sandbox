@@ -1,48 +1,44 @@
-from collections import namedtuple
+import json
+import atexit
+import logging
 
-from pysnmp import debug
-#from pysnmp.smi import builder, view
-from pysnmp.entity.rfc3413.oneliner import cmdgen
+import curses_cli
+import pdu_config
+import app_config
+import db_model
+from pdumaster import pdu_device_whisperer
 
+DEBUG = True
 
-pdu_data = namedtuple("pdu_data", ("modName", "symName", "suffix"))
-
-#thanks checkaa for the name
-class pdu_device_whisperer:
-    def __init__(self, pdus):
-        self.pdus = pdus
-
-    def scan_pdus(self):
-        """Scans all the pdus and returns a list of named tuples"""
-        for pdu in self.pdus:
-            errorIndication, errorStatus, errorIndex, varBindTable = cmdGen.nextCmd(
-                cmdgen.CommunityData('OSL_private'),
-                cmdgen.UdpTransportTarget((pdu, port)),
-                cmdgen.MibVariable('Sentry3',''),
-                lookupNames=True, lookupValues=True, lexicographicMode=True,
-                ignoreNonIncreasingOid=True
-            )
-
-        pdu_data_list = []
-        # Check for errors and print out results
-        if errorIndication:
-            #TODO: handle errors gracefully
-            print(errorIndication)
-            error += die
+class Controller:
+    def setup(self):
+        """Setup ui and database, get pdu stats."""
+        if DEBUG:
+            #Enable logging
+            logging.basicConfig(filename="debug.log", level=logging.DEBUG)
         else:
-            if errorStatus:
-                print('%s at %s' % (errorStatus.prettyPrint(),
-                errorIndex and varBindTable[-1][int(errorIndex)-1] or '?'))
-                #TODO: handle errors gracefully
-                error += die
-            else:
-                for varBindTableRow in varBindTable:
-                    for name, val in varBindTableRow:
-                        modName, symName, suffix = mibViewController.getNodeLocation((name))
-                        print "%s - %s - %s - %s" % (pdu, symName, suffix, val)
-                        print "-------"
-                        pdu_data_list.append(pdu_data(modName, symName, suffix))
-                        #print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
-        return pdu_data_list
+            #When the program exits call the cleanup to clean up curses and the db
+            atexit.register(self.cleanup)
+        pdus = pdu_config.read_pdu_config()
+        logging.debug("PDUs in config: {0}", pdus)
+        self.db = db_manager(app_config.db_engine)
 
+        whisperer = pdu_device_whisperer()
+        create_cli()
 
+        self.db = db_model.db_model(in_memory=True)
+        self.db.add_many_pdus(pdumaster.get_stats())
+
+    def create_cli():
+        self.cli = curses_cli.curses_cli()
+        self.cli.setup()
+        self.cli.draw_ui(pdus)
+
+    def cleanup(self):
+        """When the program exits clean up changes curses made to the terminal and the db session"""
+        self.cli.cleanup()
+        print "Sorry, there was an error we couldn't recover from."
+
+if __name__ == '__main__':
+    controller = Controller()
+    controller.setup()
