@@ -1,3 +1,4 @@
+from collections import namedtuple
 
 from pysnmp import debug
 #from pysnmp.smi import builder, view
