@@ -1,6 +1,8 @@
 import json
 import atexit
 import logging
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 import curses_cli
 import pdu_config
@@ -8,37 +10,48 @@ import app_config
 import db_model
 from pdumaster import pdu_device_whisperer
 
-DEBUG = True
 
-class Controller:
+class PduMaster:
     def setup(self):
         """Setup ui and database, get pdu stats."""
-        if DEBUG:
-            #Enable logging
-            logging.basicConfig(filename="debug.log", level=logging.DEBUG)
-        else:
-            #When the program exits call the cleanup to clean up curses and the db
-            atexit.register(self.cleanup)
+        #Enable logging
+        logging.basicConfig(filename="debug.log", level=logging.DEBUG)
+
+        #When the program exits call the cleanup to clean up curses and the db
+        atexit.register(self.cleanup)
+ 
+        #Read configs
+        app_config.read_pdumaster_config()
         pdus = pdu_config.read_pdu_config()
         logging.debug("PDUs in config: {0}", pdus)
-        self.db = db_manager(app_config.db_engine)
+        
+        create_cli()
+        create_db()
 
         whisperer = pdu_device_whisperer()
-        create_cli()
+        self.cli.draw_ui(pdus)
 
         self.db = db_model.db_model(in_memory=True)
         self.db.add_many_pdus(pdumaster.get_stats())
 
+    #TODO: Add clean api between curses and PduMaster
+
+
     def create_cli():
         self.cli = curses_cli.curses_cli()
         self.cli.setup()
-        self.cli.draw_ui(pdus)
+
+    def create_db():
+        if app_config.db_engine == None:
+            self.engine = create_engine("sqlite:///:memory:")
+            #TODO Base needs to be associated with the model somehow
+            Base.metadata.create_all(self.engine)
+        else:
+            self.engine = create_engine(app_config.db_engine)
+        self.db_session = sessionmaker(bind=self.engine)
 
     def cleanup(self):
         """When the program exits clean up changes curses made to the terminal and the db session"""
         self.cli.cleanup()
-        print "Sorry, there was an error we couldn't recover from."
 
-if __name__ == '__main__':
-    controller = Controller()
-    controller.setup()
+#TODO do we want this to be directly executable??
