@@ -27,7 +27,7 @@ class Controller:
         whisperer = pdu_device_whisperer(pdus)
 
         self.cli.draw_ui(pdus)
-        self.db = db_model.db_model(inMemory=True)
+        self.db = db_model.db_model(in_memory=True)
         self.db.add_many_pdus(pdumaster.get_stats())
 
     def read_config(config_name=None):
