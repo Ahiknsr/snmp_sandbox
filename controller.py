@@ -4,17 +4,19 @@ import logging
 
 import curses_cli
 import db_model
-import pdumaster
+from pdumaster import pdu_device_whisperer
 
-DEBUT = True
+DEBUG = True
 
 class Controller:
     def setup(self):
         """Setup ui and database, get pdu stats."""
-        #When the program exits call the cleanup to clean up curses and the db
-        atexit.register(self.cleanup)
         if DEBUG:
+            #Enable logging
             logging.basicConfig(filename="debug.log", level=logging.DEBUG)
+        else:
+            #When the program exits call the cleanup to clean up curses and the db
+            atexit.register(self.cleanup)
 
         self.cli = curses_cli.curses_cli()
         self.cli.setup()
@@ -31,7 +33,7 @@ class Controller:
     def read_config(config_name=None):
         """Reads a config file (default is ./osuosl_pdus.conf), parses it as json and returns the python dictionary it represents"""
         if config_name != None:
-            controller = './osuosl_pdus.conf'
+            controller = './osuosl_pdus.json'
         config = open(controller, 'r')
         config_pdus = json.load(config)
         config.close()
