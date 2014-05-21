@@ -4,7 +4,6 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-import curses_cli
 import pdu_config
 import app_config
 import db_model
@@ -25,8 +24,6 @@ class PduMaster:
         pdus = pdu_config.read_pdu_config()
         logging.debug("PDUs in config: {0}", pdus)
         
-        create_cli()
-        create_db()
 
         whisperer = pdu_device_whisperer()
         self.cli.draw_ui(pdus)
@@ -34,12 +31,8 @@ class PduMaster:
         self.db = db_model.db_model(in_memory=True)
         self.db.add_many_pdus(pdumaster.get_stats())
 
-    #TODO: Add clean api between curses and PduMaster
+    #TODO: Add clean api
 
-
-    def create_cli():
-        self.cli = curses_cli.curses_cli()
-        self.cli.setup()
 
     def create_db():
         if app_config.db_engine == None:
@@ -51,7 +44,6 @@ class PduMaster:
         self.db_session = sessionmaker(bind=self.engine)
 
     def cleanup(self):
-        """When the program exits clean up changes curses made to the terminal and the db session"""
-        self.cli.cleanup()
+        """When the program exits clean up the db session"""
+		self.db_session.close()
 
-#TODO do we want this to be directly executable??
