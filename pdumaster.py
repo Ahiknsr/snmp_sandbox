@@ -33,15 +33,15 @@ class PduMaster:
     def update_pdu_list(self, pdus, **fields):
         """Takes a list of pdus as well as *properly* named fields to update"""
         for pdu in pdus:
-            self.update(PduUnitModel).where(PduUnitModel.name = pdu.name and
-                PduUnitModel.type = pdu.type).values(**fields)
+            self.update(PduUnitModel).where(PduUnitModel.name == pdu.name and
+            PduUnitModel.type == pdu.type).values(**fields)
         self.db_session.commit()
 
-	def get_list_of_pdus():
+    def get_list_of_pdus():
         """Returns a list of pdus from the config"""
         return self.pdus
 
-	def refresh_list_of_pdus():
+    def refresh_list_of_pdus():
         """Reloads the pdu config file"""
         self.pdus = pdu_config.read_pdu_config()
 
@@ -76,4 +76,4 @@ class PduMaster:
 
     def cleanup(self):
         """When the program exits clean up the db session"""
-		self.db_session.close()
+        self.db_session.close()
