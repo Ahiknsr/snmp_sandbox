@@ -1,5 +1,5 @@
-Designing PduMaster
-===================
+Designing The PduMaster Library
+===============================
 
 Goals:
 ------
@@ -9,30 +9,31 @@ Goals:
     recognize that two pdu outlets go to the same group, so when a machine
     needs to be rebooted all members of the group must be turned off.  
 
-Interfaces:
------------
-* A scriptable command line interface for use within the internal network.  
-* A curses admin interface (I may not be able to complete this) This may run
-within the internal network.
-* Possibly a web front end  (probably written in flask). This may be run
-outside the internal network. This would require an API key or LDAP
-authentication.  
+Planned Interfaces:
+-------------------
+All interfaces will communicate with a server named `Pdu Server`, possibly 
+written using flask.
+`Pdu Server` will run on larch and respond to json api calls.
+This server will user this `Pdu Master` library to communicate with the pdus and
+database. All interfaces would require an API key or LDAP authenication with
+`Pdu Server`.  
+Proposed interfaces follow:
+* A scriptable command line interface.  
+* A curses admin interface.  
+* An http web front end. This may or may not be part of `Pdu Server`.  
 
 Architecture:
 -------------
-We want an application which runs on the internal network on `larch`. This core 
-application shall be known as `Pdu Master`, and shall be written in python 2.7.
+We want an application which runs on the internal network on `larch`. 
+The core library to handle pysnmp and database requests shall be known as
+`Pdu Master`, and shall be written in python 2.7.
 `Pdu Master` shall provide a simple, well documented python api for interacting
 with the pdus. `Pdu Master` shall be interface agnostic.
 To be clear, `Pdu Master` is not a server, but rather a core library to be used
-by one of the interfaces. In the future a `Pdu Server`, which exposes python
-api calls to the web, may be created. `Pdu Server` may include be written in
-flask with LDAP or API key authenication.
-
+by `Pdu Server`.
 
 `Pdu Master` will have a database of pdus. Pdu existance will be cached to avoid
 querying for pdu data every time `Pdu Master` starts up. 
-protocol is slow).
 `Pdu Master` will have a variety of functions to interact with the pdus over
 snmp using the pysnmp library. Funtions will include:
     * status reporting
@@ -43,9 +44,11 @@ snmp using the pysnmp library. Funtions will include:
 ----------------------
 There will be one table in the database called `pdus`. This table will have
 the following columns:
-TODO:finish listing tables
-* name (string), part of the primary key. For example
-* type (string), part of the primary key. For example
+* name (string), part of the primary key. The hostname of the pdu.
+* type (string), part of the primary key. The type of pdu, such as `Sentry3`.
+* label (string), a human readable label describing the pdu.
+* group (string), a description of what groups this pdu belongs to.
+* last_updated (datetime object), when the data on this pdu was last updated.
 
 Configuration:
 --------------
@@ -98,8 +101,10 @@ Comments About Each File:
 
 Feature Requests:
 -----------------
-In approximate order of ease of accomplishment:  
+`Pdu Master` related feature requests:
+* Racktables integration  
+
+The following features are requested for the forthcoming `Pdu Server`:
 * Logs of what anyone touches with `Pdu Master`  
 * A curses UI  
 * A web interface  
-* Racktables integration  
