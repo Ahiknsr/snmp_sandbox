@@ -31,15 +31,18 @@ class PduMaster:
         self.db_session.commit()
 
     def update_pdu_list(self, pdus, **fields):
+        """Takes a list of pdus as well as *properly* named fields to update"""
         for pdu in pdus:
             self.update(PduUnitModel).where(PduUnitModel.name = pdu.name and
                 PduUnitModel.type = pdu.type).values(**fields)
         self.db_session.commit()
 
 	def get_list_of_pdus():
+        """Returns a list of pdus from the config"""
         return self.pdus
 
 	def refresh_list_of_pdus():
+        """Reloads the pdu config file"""
         self.pdus = pdu_config.read_pdu_config()
 
     def get_pdu_status(pdu):
@@ -55,6 +58,7 @@ class PduMaster:
         pass
 
     def create_db():
+        """Create/connect with the database engine"""
         if app_config.db_engine == None:
             self.engine = create_engine("sqlite:///:memory:")
             pdu_model.Base.metadata.create_all(self.engine)
@@ -64,6 +68,7 @@ class PduMaster:
         init_db()
 
     def init_db():
+        """Query pdus for their properties and commit them to the database"""
         for pdu_key in self.pdus:
             pdu_unit = self.pdu_whisperer.get_pdu_data(pdu_key)
             self.db_session.add(new_pdu)
