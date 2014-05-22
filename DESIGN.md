@@ -67,22 +67,10 @@ folows.
 `pdumaster.json` has the following attributes:
 * `db_engine`: Specifies the name of the database engine, if it runs separately
 from the core app.  
-* `app_log_level`: Specifies the log level for the application. May be one of
-the following:
-    - `"debug"`
-    - `"warn"`
-    - `"error"`
-* `app_log_file`: Specifies the location of the application log. Defaults to
-`debug.log`.
-* `audit_log_file`: Specifies the location of the audit log. Defaults to
-`audit.log`.  
 A sample configuration follows:  
 ```
 {
     "db_engine":null
-    "app_log_level":"debug"
-    "app_log_file":"debug.log"
-    "audit_log_file":"audit.log"
 }
 ```
 

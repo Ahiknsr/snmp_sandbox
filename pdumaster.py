@@ -12,14 +12,11 @@ import pdu_whisperer
 class PduMaster:
     def __init__(self):
         """Setup ui and database, get pdu stats."""
-        #Enable logging
-        logging.basicConfig(filename="debug.log", level=logging.DEBUG)
         #When the program exits call the cleanup to clean up curses and the db
         atexit.register(self.cleanup)
         #Read configs
         app_config.read_pdumaster_config()
         self.pdus = pdu_config.read_pdu_config()
-        logging.debug("PDUs in config: {0}", pdus)
         self.pdu_whisperer = pdu_device_whisperer()
 
     def add_pdu_list(self, pdu_list):

@@ -1,5 +1,3 @@
 {
     "db_engine":null
-    "log_level":"debug"
-    "log_file":"debug.log"
 }
