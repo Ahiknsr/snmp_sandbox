@@ -14,25 +14,27 @@ Planned Interfaces:
 All interfaces will communicate with a server named `Pdu Server`, possibly 
 written using flask.
 `Pdu Server` will run on larch and respond to json api calls.
-This server will user this `Pdu Master` library to communicate with the pdus and
-database. All interfaces would require an API key or LDAP authenication with
-`Pdu Server`.  
-Proposed interfaces follow:
+This server will use the `Pdu Master` library to communicate with the pdus and
+database. All communication from users to `Pdu Server` using the json api
+would require an API key or LDAP authenication with `Pdu Server`.  
+Proposed interfaces for the json api follow:
 * A scriptable command line interface.  
 * A curses admin interface.  
 * An http web front end. This may or may not be part of `Pdu Server`.  
 
 Architecture:
 -------------
-We want an application which runs on the internal network on `larch`. 
-The core library to handle pysnmp and database requests shall be known as
+`Pdu Server` runs on the internal network on a host which is configured to 
+communicate with the pdus (currently larch). 
+The core library to handle snmp and database requests shall be known as
 `Pdu Master`, and shall be written in python 2.7.
 `Pdu Master` shall provide a simple, well documented python api for interacting
-with the pdus. `Pdu Master` shall be interface agnostic.
+with the pdus. `Pdu Server` will use `Pdu Master` and will expose a json api
+to be used by multiple interfaces.
 To be clear, `Pdu Master` is not a server, but rather a core library to be used
 by `Pdu Server`.
 
-`Pdu Master` will have a database of pdus. Pdu existance will be cached to avoid
+`Pdu Server` will have a database of pdus. Pdu existance will be cached to avoid
 querying for pdu data every time `Pdu Master` starts up. 
 `Pdu Master` will have a variety of functions to interact with the pdus over
 snmp using the pysnmp library. Funtions will include:
