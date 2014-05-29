@@ -25,10 +25,9 @@ mibBuilder.loadModules('SNMPv2-MIB', 'IF-MIB', 'Sentry3')
 mibViewController = view.MibViewController(mibBuilder)
 
 # a list of pdu ips
-ip_addresses = ('10.0.0.9', '10.0.0.13')
 
 # a list of pdu ips
-pdus = ('pdu-b210-dell03.osuosl.oob', 'pdu-b210-dell13.osuosl.oob')
+pdus = ('pdu-b210-dell65.osuosl.oob')
 
 # standard snmp port
 port = 161
