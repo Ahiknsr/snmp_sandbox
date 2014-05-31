@@ -1,18 +1,22 @@
 #thanks checkaa for the name
-
+from collections import namedtuple
 from pysnmp import debug
 #from pysnmp.smi import builder, view
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 
 import pdu_exceptions
 
-class PduWhisperer(object):
+"""tower, infeed, and outfeed should  be small integers"""
+Outlet = namedtuple('outlet', 'tower infeed outfeed', verbose=False)
 
-    port = 161
+class PduWhisperer(object):
 
     def __init__(port=None):
         if port != None:
             self.port = port
+        else:
+            self.port = 161
+        self.cmdGen = cmdgen.CommandGenerator()
 
     def scan_pdus(pdus):
         """Scans all the pdus and returns a list of named tuples"""
@@ -42,6 +46,27 @@ class PduWhisperer(object):
                         #print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
         return pdu_data_list
 
+    def get_outlet_power_state(pdu, outlet):
+        pass
+
+    def get_outlet_power_consumption(pdu, outlet):
+        pass
+
+    def get_outlets_in_same_group(pdu, outlet):
+        pass
+
+    def get_outlet_group(pdu, outlet):
+        pass
+
+    def group_list(pdu, group_name):
+        pass
+
+    def outlet_list(pdu):
+        pass
+
+    def group_outlets(outlets, groupname):
+        pass
+
     def turn_off_outlet(pdu, outlet):
         _turn_outlet(pdu, outlet, 'off')
 
@@ -57,7 +82,8 @@ class PduWhisperer(object):
         errorIndication, errorStatus, errorIndex, varBinds = cmdGen.setCmd(
             cmdgen.CommunityData('OSL_private'),
             cmdgen.UdpTransportTarget((ip_address, self.port)),
-            (cmdgen.MibVariable('Sentry3', 'outletControlAction', 2, 1, 4), status)
+            (cmdgen.MibVariable('Sentry3', 'outletControlAction', outlet.tower,
+            outlet.infeed, outlet.outfeed), status)
         )
 
         # Check for errors. If found, raise an exception
