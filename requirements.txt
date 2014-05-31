@@ -1,4 +1,4 @@
-pysnmp
+pysnmp >='4.2.5'
 pysnmp-apps
 pysnmp-mibs
 Sphinx
