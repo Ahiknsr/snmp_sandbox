@@ -11,11 +11,8 @@ Outlet = namedtuple('outlet', 'tower infeed outfeed', verbose=False)
 
 class PduWhisperer(object):
 
-    def __init__(port=None):
-        if port != None:
-            self.port = port
-        else:
-            self.port = 161
+    def __init__(port=161):
+        self.port = port
         self.cmdGen = cmdgen.CommandGenerator()
 
     def scan_pdus(pdus):
@@ -23,7 +20,7 @@ class PduWhisperer(object):
         for pdu in pdus:
             errorIndication, errorStatus, errorIndex, varBindTable = cmdGen.nextCmd(
                 cmdgen.CommunityData('OSL_private'),
-                cmdgen.UdpTransportTarget((pdu, port)),
+                cmdgen.UdpTransportTarget((pdu, self.port)),
                 cmdgen.MibVariable('Sentry3',''),
                 lookupNames=True, lookupValues=True, lexicographicMode=True,
                 ignoreNonIncreasingOid=True
@@ -46,19 +43,58 @@ class PduWhisperer(object):
                         #print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
         return pdu_data_list
 
-    def get_outlet_power_state(pdu, outlet):
-        pass
+    def outlet_is_on(pdu, outlet):
+        """Returns true if the outlet is on. If the outlet is off, rebooting,
+        or in some other state it will return false"""
+        if outlet_status == 1:
+            return True
+        else:
+            return False
+
+    def _sendGetCommand(pdu, outlet, command):
+        """Private function to send a given get command name to a pdu"""
+        errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
+            cmdgen.CommunityData('OSL_private'),
+            cmdgen.UdpTransportTarget((pdu, self.port)),
+            cmdgen.MibVariable('Sentry3', command, outlet.tower, outlet.infeed,
+                outlet.outfeed)
+        )
+        if errorIndication:
+            raise pdu_exceptions.SnmpActivationError(errorStatus, errorIndex)
+        else:
+            if errorStatus:
+                raise pdu_exceptions.SnmpActivationError(errorStatus, errorIndex)
+            else:
+                return varBinds
+
+    def outlet_status(pdu, outlet):
+        """Return the outlet's status. Maybe one of:
+            * 0 = none
+            * 1 = on
+            * 2 = off
+            * 3 = reboot"""
+        varBinds = _sendGetCommand(pdu, outlet, 'outletStatus')
+        return [reply[1] for reply in varBinds]
+
+    def get_outlet_state(pdu, outlet):
+        varBinds = _sendGetCommand(pdu, outlet, 'outletControlState')
+        return [reply[1] for reply in varBinds]
+
+
+    def get_outlet_voltage(pdu, outlet):
+        varBinds = _sendGetCommand(pdu, outlet, 'outletVoltage')
+        return [reply[1] for reply in varBinds]
+
 
     def get_outlet_power_consumption(pdu, outlet):
-        pass
+        varBinds = _sendGetCommand(pdu, outlet, 'outletPower')
+        return [reply[1] for reply in varBinds]
 
-    def get_outlets_in_same_group(pdu, outlet):
-        pass
+    def get_outlet_name(pdu, outlet):
+        varBinds = _sendGetCommand(pdu, outlet, 'outletName')
+        return [reply[1] for reply in varBinds]
 
-    def get_outlet_group(pdu, outlet):
-        pass
-
-    def group_list(pdu, group_name):
+    def get_pdu_group(pdu):
         pass
 
     def outlet_list(pdu):
@@ -68,17 +104,25 @@ class PduWhisperer(object):
         pass
 
     def turn_off_outlet(pdu, outlet):
+        """Turn the outlet on"""
         _turn_outlet(pdu, outlet, 'off')
 
     def turn_on_outlet(pdu, outlet):
+        """Turn the outlet on"""
         _turn_outlet(pdu, outlet, 'on')
 
-    def _turn_outlet(pdu, outlet, status):
-        """
-        The following sets the value of the outletcontrol action for outlet
-        4 on infeed 1 on tower 2 to "on", effectively turning the outlet on
-        """
+    def reboot_outlet(pdu, outlet):
+        """Power cycle the outlet"""
 
+        _turn_outlet(pdu, outlet, 3)
+
+    def _turn_outlet(pdu, outlet, status):
+        """Private helper function to set a pdu to a given status. Statuses
+        may be one of:
+             * 0 = none
+            * 1 = on    
+            * 2 = off     
+            * 3 = reboot"""
         errorIndication, errorStatus, errorIndex, varBinds = cmdGen.setCmd(
             cmdgen.CommunityData('OSL_private'),
             cmdgen.UdpTransportTarget((ip_address, self.port)),
