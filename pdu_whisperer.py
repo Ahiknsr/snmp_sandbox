@@ -9,6 +9,7 @@ import pdu_exceptions
 """tower, infeed, and outfeed should  be small integers"""
 Outlet = namedtuple('outlet', 'tower infeed outfeed', verbose=False)
 
+
 class PduWhisperer(object):
 
     def __init__(port=161):
@@ -18,10 +19,11 @@ class PduWhisperer(object):
     def scan_pdus(pdus):
         """Scans all the pdus and returns a list of named tuples"""
         for pdu in pdus:
-            errorIndication, errorStatus, errorIndex, varBindTable = cmdGen.nextCmd(
+            errorIndication, errorStatus, errorIndex, varBindTable =
+            cmdGen.nextCmd(
                 cmdgen.CommunityData('OSL_private'),
                 cmdgen.UdpTransportTarget((pdu, self.port)),
-                cmdgen.MibVariable('Sentry3',''),
+                cmdgen.MibVariable('Sentry3', ''),
                 lookupNames=True, lookupValues=True, lexicographicMode=True,
                 ignoreNonIncreasingOid=True
             )
@@ -32,15 +34,24 @@ class PduWhisperer(object):
             raise pdu_exceptions.SnmpActivationError(errorStatus, errorIndex)
         else:
             if errorStatus:
-                raise pdu_exceptions.SnmpActivationError(errorStatus, errorIndex)
+                raise pdu_exceptions.SnmpActivationError(
+                    errorStatus,
+                    errorIndex
+                )
             else:
                 for varBindTableRow in varBindTable:
                     for name, val in varBindTableRow:
-                        modName, symName, suffix = mibViewController.getNodeLocation((name))
+                        modName, symName, suffix =
+                        mibViewController.getNodeLocation((name))
                         print "%s - %s - %s - %s" % (pdu, symName, suffix, val)
                         print "-------"
-                        pdu_data_list.append(pdu_data(modName, symName, suffix))
-                        #print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
+                        pdu_data_list.append(
+                            pdu_data(
+                                modName,
+                                symName,
+                                suffix
+                                )
+                        )
         return pdu_data_list
 
     def outlet_is_on(pdu, outlet):
@@ -56,14 +67,22 @@ class PduWhisperer(object):
         errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
             cmdgen.CommunityData('OSL_private'),
             cmdgen.UdpTransportTarget((pdu, self.port)),
-            cmdgen.MibVariable('Sentry3', command, outlet.tower, outlet.infeed,
-                outlet.outfeed)
+            cmdgen.MibVariable(
+                'Sentry3',
+                command,
+                outlet.tower,
+                outlet.infeed,
+                outlet.outfeed
+            )
         )
         if errorIndication:
             raise pdu_exceptions.SnmpActivationError(errorStatus, errorIndex)
         else:
             if errorStatus:
-                raise pdu_exceptions.SnmpActivationError(errorStatus, errorIndex)
+                raise pdu_exceptions.SnmpActivationError(
+                    errorStatus,
+                    errorIndex
+                )
             else:
                 return varBinds
 
@@ -80,11 +99,9 @@ class PduWhisperer(object):
         varBinds = _sendGetCommand(pdu, outlet, 'outletControlState')
         return [reply[1] for reply in varBinds]
 
-
     def get_outlet_voltage(pdu, outlet):
         varBinds = _sendGetCommand(pdu, outlet, 'outletVoltage')
         return [reply[1] for reply in varBinds]
-
 
     def get_outlet_power_consumption(pdu, outlet):
         varBinds = _sendGetCommand(pdu, outlet, 'outletPower')
@@ -120,14 +137,19 @@ class PduWhisperer(object):
         """Private helper function to set a pdu to a given status. Statuses
         may be one of:
              * 0 = none
-            * 1 = on    
-            * 2 = off     
+            * 1 = on
+            * 2 = off
             * 3 = reboot"""
         errorIndication, errorStatus, errorIndex, varBinds = cmdGen.setCmd(
             cmdgen.CommunityData('OSL_private'),
             cmdgen.UdpTransportTarget((ip_address, self.port)),
-            (cmdgen.MibVariable('Sentry3', 'outletControlAction', outlet.tower,
-            outlet.infeed, outlet.outfeed), status)
+            (cmdgen.MibVariable(
+                'Sentry3',
+                'outletControlAction',
+                outlet.tower,
+                outlet.infeed,
+                outlet.outfeed),
+                status)
         )
 
         # Check for errors. If found, raise an exception
@@ -143,4 +165,3 @@ class PduWhisperer(object):
             else:
                 for name, val in varBinds:
                     print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
-
