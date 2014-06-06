@@ -19,8 +19,8 @@ class PduWhisperer(object):
     def scan_pdus(pdus):
         """Scans all the pdus and returns a list of named tuples"""
         for pdu in pdus:
-            errorIndication, errorStatus, errorIndex, varBindTable =
-            cmdGen.nextCmd(
+            errorIndication, errorStatus, errorIndex,
+            varBindTable = cmdGen.nextCmd(
                 cmdgen.CommunityData('OSL_private'),
                 cmdgen.UdpTransportTarget((pdu, self.port)),
                 cmdgen.MibVariable('Sentry3', ''),
@@ -41,8 +41,8 @@ class PduWhisperer(object):
             else:
                 for varBindTableRow in varBindTable:
                     for name, val in varBindTableRow:
-                        modName, symName, suffix =
-                        mibViewController.getNodeLocation((name))
+                        modName, symName,
+                        suffix = mibViewController.getNodeLocation((name))
                         print "%s - %s - %s - %s" % (pdu, symName, suffix, val)
                         print "-------"
                         pdu_data_list.append(
