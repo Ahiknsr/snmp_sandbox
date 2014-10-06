@@ -27,7 +27,7 @@ mibViewController = view.MibViewController(mibBuilder)
 # a list of pdu ips
 
 # a list of pdu ips
-pdus = ('pdu-b210-dell65.osuosl.oob')
+pdus = ('pdu-b210-dell65.osuosl.oob',)
 
 # standard snmp port
 port = 161
