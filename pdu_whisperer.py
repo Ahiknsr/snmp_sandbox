@@ -12,11 +12,11 @@ Outlet = namedtuple('outlet', 'tower infeed outfeed', verbose=False)
 
 class PduWhisperer(object):
 
-    def __init__(port=161):
+    def __init__(self, port=161):
         self.port = port
         self.cmdGen = cmdgen.CommandGenerator()
 
-    def scan_pdus(pdus):
+    def scan_pdus(self, pdus):
         """Scans all the pdus and returns a list of named tuples"""
         for pdu in pdus:
             errorIndication, errorStatus, errorIndex,
@@ -54,7 +54,7 @@ class PduWhisperer(object):
                         )
         return pdu_data_list
 
-    def outlet_is_on(pdu, outlet):
+    def outlet_is_on(self, pdu, outlet):
         """Returns true if the outlet is on. If the outlet is off, rebooting,
         or in some other state it will return false"""
         if outlet_status == 1:
@@ -62,7 +62,7 @@ class PduWhisperer(object):
         else:
             return False
 
-    def _sendGetCommand(pdu, outlet, command):
+    def _sendGetCommand(self, pdu, outlet, command):
         """Private function to send a given get command name to a pdu"""
         errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
             cmdgen.CommunityData('OSL_private'),
@@ -86,7 +86,7 @@ class PduWhisperer(object):
             else:
                 return varBinds
 
-    def outlet_status(pdu, outlet):
+    def outlet_status(self, pdu, outlet):
         """Return the outlet's status. Maybe one of:
             * 0 = none
             * 1 = on
@@ -95,45 +95,45 @@ class PduWhisperer(object):
         varBinds = _sendGetCommand(pdu, outlet, 'outletStatus')
         return [reply[1] for reply in varBinds]
 
-    def get_outlet_state(pdu, outlet):
+    def get_outlet_state(self, pdu, outlet):
         varBinds = _sendGetCommand(pdu, outlet, 'outletControlState')
         return [reply[1] for reply in varBinds]
 
-    def get_outlet_voltage(pdu, outlet):
+    def get_outlet_voltage(self, pdu, outlet):
         varBinds = _sendGetCommand(pdu, outlet, 'outletVoltage')
         return [reply[1] for reply in varBinds]
 
-    def get_outlet_power_consumption(pdu, outlet):
+    def get_outlet_power_consumption(self, pdu, outlet):
         varBinds = _sendGetCommand(pdu, outlet, 'outletPower')
         return [reply[1] for reply in varBinds]
 
-    def get_outlet_name(pdu, outlet):
+    def get_outlet_name(self, pdu, outlet):
         varBinds = _sendGetCommand(pdu, outlet, 'outletName')
         return [reply[1] for reply in varBinds]
 
-    def get_pdu_group(pdu):
+    def get_pdu_group(self, pdu):
         pass
 
-    def outlet_list(pdu):
+    def outlet_list(self, pdu):
         pass
 
-    def group_outlets(outlets, groupname):
+    def group_outlets(self, outlets, groupname):
         pass
 
-    def turn_off_outlet(pdu, outlet):
+    def turn_off_outlet(self, pdu, outlet):
         """Turn the outlet on"""
         _turn_outlet(pdu, outlet, 'off')
 
-    def turn_on_outlet(pdu, outlet):
+    def turn_on_outlet(self, pdu, outlet):
         """Turn the outlet on"""
         _turn_outlet(pdu, outlet, 'on')
 
-    def reboot_outlet(pdu, outlet):
+    def reboot_outlet(self, pdu, outlet):
         """Power cycle the outlet"""
 
         _turn_outlet(pdu, outlet, 3)
 
-    def _turn_outlet(pdu, outlet, status):
+    def _turn_outlet(self, pdu, outlet, status):
         """Private helper function to set a pdu to a given status. Statuses
         may be one of:
              * 0 = none
