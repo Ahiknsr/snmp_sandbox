@@ -1,26 +1,44 @@
 #thanks checkaa for the name
+import os
 from collections import namedtuple
 from pysnmp import debug
-#from pysnmp.smi import builder, view
+from pysnmp.smi import builder, view
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 
 import pdu_exceptions
 
 """tower, infeed, and outfeed should  be small integers"""
-Outlet = namedtuple('outlet', 'tower infeed outfeed', verbose=False)
+Outlet = namedtuple('outlet', ['tower', 'infeed', 'outfeed',], verbose=False)
 
 
 class PduWhisperer(object):
 
     def __init__(self, port=161):
         self.port = port
-        self.cmdGen = cmdgen.CommandGenerator()
+        self.cmdgen = cmdgen.CommandGenerator()
+        self.build_mibs()
+
+    def build_mibs(self):
+        mibdir = "%s/mib" % os.path.dirname(os.path.realpath(__file__))
+
+        # create MIB builder
+        #mibBuilder = builder.MibBuilder()
+
+        mibBuilder = self.cmdgen.snmpEngine.msgAndPduDsp.mibInstrumController.mibBuilder
+
+        # load mibs
+        mibSources = mibBuilder.getMibSources() + (builder.DirMibSource(mibdir),)
+        mibBuilder.setMibSources(*mibSources)
+
+        mibBuilder.loadModules('SNMPv2-MIB', 'IF-MIB', 'Sentry3')
+
+        # the view controller is handy for viewing objects
+        self.mibViewController = view.MibViewController(mibBuilder)
 
     def scan_pdus(self, pdus):
         """Scans all the pdus and returns a list of named tuples"""
         for pdu in pdus:
-            errorIndication, errorStatus, errorIndex,
-            varBindTable = cmdGen.nextCmd(
+            errorIndication, errorStatus, errorIndex, varBindTable = self.cmdgen.nextCmd(
                 cmdgen.CommunityData('OSL_private'),
                 cmdgen.UdpTransportTarget((pdu, self.port)),
                 cmdgen.MibVariable('Sentry3', ''),
@@ -41,12 +59,11 @@ class PduWhisperer(object):
             else:
                 for varBindTableRow in varBindTable:
                     for name, val in varBindTableRow:
-                        modName, symName,
-                        suffix = mibViewController.getNodeLocation((name))
+                        modName, symName, suffix = self.mibViewController.getNodeLocation((name))
                         print "%s - %s - %s - %s" % (pdu, symName, suffix, val)
                         print "-------"
                         pdu_data_list.append(
-                            pdu_data(
+                                (
                                 modName,
                                 symName,
                                 suffix
@@ -64,7 +81,7 @@ class PduWhisperer(object):
 
     def _sendGetCommand(self, pdu, outlet, command):
         """Private function to send a given get command name to a pdu"""
-        errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
+        errorIndication, errorStatus, errorIndex, varBinds = self.cmdgen.getCmd(
             cmdgen.CommunityData('OSL_private'),
             cmdgen.UdpTransportTarget((pdu, self.port)),
             cmdgen.MibVariable(
@@ -92,23 +109,23 @@ class PduWhisperer(object):
             * 1 = on
             * 2 = off
             * 3 = reboot"""
-        varBinds = _sendGetCommand(pdu, outlet, 'outletStatus')
+        varBinds = self._sendGetCommand(pdu, outlet, 'outletStatus')
         return [reply[1] for reply in varBinds]
 
     def get_outlet_state(self, pdu, outlet):
-        varBinds = _sendGetCommand(pdu, outlet, 'outletControlState')
+        varBinds = self._sendGetCommand(pdu, outlet, 'outletControlState')
         return [reply[1] for reply in varBinds]
 
     def get_outlet_voltage(self, pdu, outlet):
-        varBinds = _sendGetCommand(pdu, outlet, 'outletVoltage')
+        varBinds = self._sendGetCommand(pdu, outlet, 'outletVoltage')
         return [reply[1] for reply in varBinds]
 
     def get_outlet_power_consumption(self, pdu, outlet):
-        varBinds = _sendGetCommand(pdu, outlet, 'outletPower')
+        varBinds = self._sendGetCommand(pdu, outlet, 'outletPower')
         return [reply[1] for reply in varBinds]
 
     def get_outlet_name(self, pdu, outlet):
-        varBinds = _sendGetCommand(pdu, outlet, 'outletName')
+        varBinds = self._sendGetCommand(pdu, outlet, 'outletName')
         return [reply[1] for reply in varBinds]
 
     def get_pdu_group(self, pdu):
@@ -122,16 +139,15 @@ class PduWhisperer(object):
 
     def turn_off_outlet(self, pdu, outlet):
         """Turn the outlet on"""
-        _turn_outlet(pdu, outlet, 'off')
+        self._turn_outlet(pdu, outlet, 'off')
 
     def turn_on_outlet(self, pdu, outlet):
         """Turn the outlet on"""
-        _turn_outlet(pdu, outlet, 'on')
+        self._turn_outlet(pdu, outlet, 'on')
 
     def reboot_outlet(self, pdu, outlet):
         """Power cycle the outlet"""
-
-        _turn_outlet(pdu, outlet, 3)
+        self._turn_outlet(pdu, outlet, 3)
 
     def _turn_outlet(self, pdu, outlet, status):
         """Private helper function to set a pdu to a given status. Statuses
@@ -140,9 +156,9 @@ class PduWhisperer(object):
             * 1 = on
             * 2 = off
             * 3 = reboot"""
-        errorIndication, errorStatus, errorIndex, varBinds = cmdGen.setCmd(
+        errorIndication, errorStatus, errorIndex, varBinds = self.cmdgen.setCmd(
             cmdgen.CommunityData('OSL_private'),
-            cmdgen.UdpTransportTarget((ip_address, self.port)),
+            cmdgen.UdpTransportTarget((pdu, self.port)),
             (cmdgen.MibVariable(
                 'Sentry3',
                 'outletControlAction',
