@@ -1,5 +1,5 @@
 import unittest
-import pdu_whisperer
+from pdu_whisperer import PduWhisperer, Outlet
 
 class TestPduWhisperer(unittest.TestCase):
     def setUp(self):
@@ -7,19 +7,20 @@ class TestPduWhisperer(unittest.TestCase):
         self.pdus = ('pdu-b210-dell65.osuosl.oob',)
 
     def test_get_outlet_power_state(self):
-        print self.whisperer(self.pdus)
+        print self.whisperer.scan_pdus(self.pdus)
 
     def test_turn_outlet(self):
+        outlet = Outlet(0, 0, 0)
         # Turn off outlet 0
-        whisperer.turn_off_outlet(self.pdus[0], 0)
+        self.whisperer.turn_off_outlet(self.pdus[0], outlet)
         # Asset that it's off
-        self.assertTrue(whisperer.outletStatus(self.pdus[0], 0) == 2)
-        whisperer.turn_on_outlet(self.pdus[0], 0)
+        self.assertEqual(self.whisperer.outlet_status(self.pdus[0], outlet), 2)
+        self.whisperer.turn_on_outlet(self.pdus[0], outlet)
         # Assert that the outlet is on
-        self.assertTrue(whisperer.outletStatus(self.pdus[0], 0) == 1)
-        whisperer.turn_off_outlet(self.pdus[0], 0)
+        self.assertEqual(self.whisperer.outlet_status(self.pdus[0], outlet), 1)
+        self.whisperer.turn_off_outlet(self.pdus[0], outlet)
         # Asset that it's off again
-        self.assertTrue(whisperer.outletStatus(self.pdus[0], 0) == 2)
+        self.assertEqual(self.whisperer.outlet_status(self.pdus[0], outlet), 2)
 
     def tearDown(self):
         pass
