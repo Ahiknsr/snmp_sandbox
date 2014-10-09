@@ -1,5 +1,5 @@
 import unittest
-from pdu_whisperer import PduWhisperer, Outlet
+from pdumaster.pdu_whisperer import PduWhisperer, Outlet
 
 class TestPduWhisperer(unittest.TestCase):
     def setUp(self):

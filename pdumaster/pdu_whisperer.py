@@ -5,7 +5,7 @@ from pysnmp import debug
 from pysnmp.smi import builder, view
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 
-import pdu_exceptions
+from pdumaster import pdu_exceptions
 
 """tower, infeed, and outfeed should  be small integers"""
 Outlet = namedtuple('outlet', ['tower', 'infeed', 'outfeed',], verbose=False)
