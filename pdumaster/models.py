@@ -41,10 +41,11 @@ class SentryPdu(object):
     Power Distribution Unit. Not to be confused with a Protocol Data Unit.
     """
 
-    def __init__(self, cmdgen, addr="localhost", port=161, timeout=1, retries=5, community_data=""):
+    def __init__(self, cmdgen, addr="localhost", port=161, timeout=1, retries=5, set_community_data="", get_community_data=""):
         self.cmdgen = cmdgen
         self.transport = cmdgenerator.UdpTransportTarget((addr, port), retries)
-        self.community_data = cmdgenerator.CommunityData(community_data),
+        self.set_community_data = cmdgenerator.CommunityData(set_community_data)
+        self.get_community_data = cmdgenerator.CommunityData(get_community_data)
 
     def _check_errors(self, errorIndication, errorStatus, errorIndex, varBinds):
         if errorIndication or errorStatus:
@@ -57,14 +58,14 @@ class SentryPdu(object):
 
     def _sendSetCommand(self, outlet, command, value):
         """Private function to send a given set command name to a pdu"""
-        results = self.cmdgen.setCmd(self.community_data, self.transport,
+        results = self.cmdgen.setCmd(self.set_community_data, self.transport,
             (self.outletCommand(outlet, command), value)
         )
         return self._check_errors(*results)
 
     def _sendGetCommand(self, outlet, command):
         """Private function to send a given get command name to a pdu"""
-        results = self.cmdgen.getCmd(self.community_data, self.transport,
+        results = self.cmdgen.getCmd(self.get_community_data, self.transport,
             self.outletCommand(outlet, command)
         )
         return self._check_errors(*results)
