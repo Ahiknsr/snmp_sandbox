@@ -4,6 +4,8 @@ import collections
 from pysnmp.entity.rfc3413.oneliner import cmdgen as cmdgenerator
 from pysnmp.smi import builder
 
+from pdumaster import pdu_exceptions
+
 SENTRY_MIB_DIR = "%s/mib" % os.path.dirname(os.path.realpath(__file__))
 
 
@@ -12,27 +14,16 @@ community_data = 'OSL_private'
 
 Outlet = collections.namedtuple('outlet', ['tower', 'infeed', 'outfeed',], verbose=False)
 
+def init_mib_builder(cmdgen, mib_dir=SENTRY_MIB_DIR):
+    mib_builder = cmdgen.snmpEngine.msgAndPduDsp.mibInstrumController.mibBuilder
 
-# need to call this before using _sendGetCommand
+    sources = mib_builder.getMibSources() + (
+        builder.DirMibSource(mib_dir),
+    )
+    mib_builder.setMibSources(*sources)
+    mib_builder.loadModules('SNMPv2-MIB', 'IF-MIB', 'Sentry3')
 
-class MibManager(object):
-    cmdgen = None
-    mib_builder = None
-
-    def __init__(self, cmdgen, mib_dir):
-        self.cmdgen = cmdgen
-        self.mib_dir = mib_dir
-        self.mib_builder = self.init_mib_builder(cmdgen, mib_dir)
-
-    def init_mib_builder(self, cmdgen, mib_dir):
-        mib_dir = builder.DirMibSource(mib_dir)
-        mib_builder = cmdgen.snmpEngine.msgAndPduDsp.mibInstrumController.mibBuilder
-
-        sources = mib_builder.getMibSources() + (mib_dir,)
-        mib_builder.setMibSources(*sources)
-        mib_builder.loadModules('SNMPv2-MIB', 'IF-MIB', 'Sentry3')
-
-        return mib_builder
+    return mib_builder
 
 
 class SentryPdu(object):
@@ -73,4 +64,6 @@ class SentryPdu(object):
     def turn_outlet(self, outlet, status):
         command = 'outletControlAction'
         return self._sendSetCommand(outlet, command, status)
+
+
 
