@@ -3,3 +3,4 @@ pyasn1==0.1.7
 pycrypto==2.6.1
 pysnmp==4.2.5
 pysnmp-mibs==0.1.4
+toml==0.8.2
