@@ -46,10 +46,9 @@ def update_config(conf):
     return conf
 
 
-class SentryPdu(object):
+class SnmpWrapper(object):
     """
-    An object which provides an interface for interacting with a
-    Power Distribution Unit. Not to be confused with a Protocol Data Unit.
+    Wraps SNMP commands in an easier to use interface.
     """
 
     def __init__(self, cmdgen, address="localhost", port=161, timeout=1,
@@ -67,25 +66,41 @@ class SentryPdu(object):
         else:
             return varBinds
 
-    def outletCommand(self, outlet, command):
-        return cmdgenerator.MibVariable('Sentry3', command, *outlet)
+    def set_command_args(self, *args, **kwargs):
+        raise NotImplementedError()
 
-    def _sendSetCommand(self, outlet, command, value):
+    def get_command_args(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def sendSetCommand(self, *args, **kwargs):
         """Private function to send a given set command name to a pdu"""
         results = self.cmdgen.setCmd(
             self.set_community, self.transport,
-            (self.outletCommand(outlet, command), value)
+            self.set_command_args(*args, **kwargs)
         )
         return self._check_errors(*results)
 
-    def _sendGetCommand(self, outlet, command):
+    def sendGetCommand(self, *args, **kwargs):
         """Private function to send a given get command name to a pdu"""
         results = self.cmdgen.getCmd(
             self.get_community, self.transport,
-            self.outletCommand(outlet, command)
+            self.get_command_args(*args, **kwargs)
         )
         return self._check_errors(*results)
 
+
+class SentryPdu(SnmpWrapper):
+
+    def set_command_args(self, outlet, command, value, *args, **kwargs):
+        return (self.outletCommand(outlet, command), value)
+
+    def get_command_args(self, outlet, command, *args, **kwargs):
+        return self.outletCommand(outlet, command)
+
+    def outletCommand(self, outlet, command):
+        return cmdgenerator.MibVariable('Sentry3', command, *outlet)
+
     def turn_outlet(self, outlet, status):
         command = 'outletControlAction'
-        return self._sendSetCommand(outlet, command, status)
+        return self.sendSetCommand(outlet, command, status)
+
