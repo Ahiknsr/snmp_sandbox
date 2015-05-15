@@ -2,7 +2,6 @@ from pysnmp import debug
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 from pysnmp.smi import builder, view
 import argparse
-import tabulate
 import os
 
 #debug.setLogger(debug.Debug('all'))
@@ -19,7 +18,7 @@ mibBuilder = cmdGen.snmpEngine.msgAndPduDsp.mibInstrumController.mibBuilder
 mibSources = mibBuilder.getMibSources() + (builder.DirMibSource(mibdir),)
 mibBuilder.setMibSources(*mibSources)
 
-mibBuilder.loadModules('SNMPv2-MIB', 'IF-MIB', 'Sentry3')
+mibBuilder.loadModules('SNMPv2-MIB',  'Sentry3')
 
 # the view controller is handy for viewing objects
 mibViewController = view.MibViewController(mibBuilder)
